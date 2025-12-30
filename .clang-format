@@ -1,0 +1,39 @@
+# =========================
+# C formatting rules
+# =========================
+
+Language: C
+BasedOnStyle: LLVM
+
+# Indentation
+IndentWidth: 2
+TabWidth: 2
+UseTab: Never
+
+# Braces / blocks
+BreakBeforeBraces: Attach
+BraceWrapping:
+  AfterControlStatement: false
+  AfterFunction: false
+  AfterStruct: false
+  AfterUnion: false
+  AfterEnum: false
+  BeforeElse: false
+
+# Spacing
+SpaceBeforeParens: ControlStatements
+SpacesInParentheses: false
+SpaceBeforeAssignmentOperators: true
+
+# Line length
+ColumnLimit: 100
+
+# Alignment
+AlignAfterOpenBracket: Align
+AlignOperands: true
+AlignTrailingComments: true
+
+# Short statements
+AllowShortIfStatementsOnASingleLine: false
+AllowShortLoopsOnASingleLine: false
+AllowShortFunctionsOnASingleLine: None
