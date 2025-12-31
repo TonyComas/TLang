@@ -37,3 +37,9 @@ AlignTrailingComments: true
 AllowShortIfStatementsOnASingleLine: false
 AllowShortLoopsOnASingleLine: false
 AllowShortFunctionsOnASingleLine: None
+
+# Includes
+SortIncludes: false
+
+# Pointer style
+PointerAlignment: Left
