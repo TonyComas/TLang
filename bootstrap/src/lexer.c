@@ -6,19 +6,31 @@
 #include <ctype.h>
 
 static const char* src;
-static Token current;
 
 void lexer_init(const char* input) {
   src = input;
 }
 
-static void skip_ws() {
-  while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t') {
+static void skip_ws(void) {
+  while (*src == ' ' || *src == '\n' || *src == '\r' || *src == '\t')
     src++;
-  }
 }
 
-Token next_token() {
+static int match_keyword(const char* start, int len, const char* kw) {
+  return (int)strlen(kw) == len && strncmp(start, kw, len) == 0;
+}
+
+char* strndup(const char* s, size_t n) {
+  char* p = malloc(n + 1);
+  if (!p) {
+    return NULL;
+  }
+  strncpy(p, s, n);
+  p[n] = '\0';
+  return p;
+}
+
+Token next_token(void) {
   skip_ws();
 
   Token tok = {0};
@@ -29,9 +41,9 @@ Token next_token() {
     return tok;
   }
 
-  if (*src >= '0' && *src <= '9') {
+  if (isdigit(*src)) {
     long val = 0;
-    while (*src >= '0' && *src <= '9') {
+    while (isdigit(*src)) {
       val = val * 10 + (*src - '0');
       src++;
     }
@@ -40,9 +52,26 @@ Token next_token() {
     return tok;
   }
 
-  if (!strncmp(src, "return", 6) && !isalnum(src[6])) {
-    src += 6;
-    tok.type = TOK_RETURN;
+  if (isalpha(*src) || *src == '_') {
+    const char* start = src;
+    while (isalnum(*src) || *src == '_') {
+      src++;
+    }
+
+    int len = src - start;
+
+    if (match_keyword(start, len, "return")) {
+      tok.type = TOK_RETURN;
+      return tok;
+    }
+
+    if (match_keyword(start, len, "let")) {
+      tok.type = TOK_LET;
+      return tok;
+    }
+
+    tok.type = TOK_IDENT;
+    tok.name = strndup(start, len);
     return tok;
   }
 
@@ -59,6 +88,9 @@ Token next_token() {
   case '/':
     tok.type = TOK_SLASH;
     break;
+  case '=':
+    tok.type = TOK_ASSIGN;
+    break;
   case '(':
     tok.type = TOK_LPAREN;
     break;
@@ -69,7 +101,7 @@ Token next_token() {
     tok.type = TOK_SEMI;
     break;
   default:
-    fprintf(stderr, "Unexpected character\n");
+    fprintf(stderr, "Unexpected character: '%c'\n", src[-1]);
     exit(1);
   }
 

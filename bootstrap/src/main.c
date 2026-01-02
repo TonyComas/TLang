@@ -12,9 +12,6 @@ int main(int argc, char** argv) {
   char* source = read_file(argv[1]);
 
   lexer_init(source);
-  AST* tree = parse_stmt();
-  printf(".global main\n");
-  printf("main:\n");
-  codegen(tree);
-  printf("    ret\n");
+  AST* tree = parse_program();
+  codegen_program(tree);
 }

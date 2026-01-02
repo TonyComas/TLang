@@ -1,11 +1,24 @@
 #pragma once
 
-typedef enum { AST_RETURN, AST_FUNC, AST_INT, AST_ADD, AST_SUB, AST_MUL, AST_DIV } ASTType;
+typedef enum {
+  AST_RETURN,
+  AST_FUNC,
+  AST_INT,
+  AST_ADD,
+  AST_SUB,
+  AST_MUL,
+  AST_DIV,
+  AST_VAR,
+  AST_LET,
+  AST_ASSIGN,
+  AST_SEQ
+} ASTType;
 
 typedef struct AST {
   ASTType type;
   struct AST* lhs;
   struct AST* rhs;
   long value;
+  const char* name;
 } AST;
-AST* new_ast(ASTType type, AST* lhs, AST* rhs, long value);
+AST* new_ast(ASTType type, AST* lhs, AST* rhs, long value, const char* name);
