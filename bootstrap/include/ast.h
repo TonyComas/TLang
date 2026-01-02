@@ -11,7 +11,8 @@ typedef enum {
   AST_VAR,
   AST_LET,
   AST_ASSIGN,
-  AST_SEQ
+  AST_SEQ,
+  AST_BLOCK
 } ASTType;
 
 typedef struct AST {

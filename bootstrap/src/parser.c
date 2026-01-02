@@ -4,6 +4,17 @@
 #include "common.h"
 #include "symtab.h"
 
+static void advance(void);
+static void expect(TokenType type);
+static void error(const char* msg);
+AST* parse_primary(void);
+AST* parse_mul(void);
+AST* parse_add(void);
+AST* parse_expr(void);
+AST* parse_stmt(void);
+AST* parse_program(void);
+AST* parse_block(void);
+
 static Token tok;
 
 static void advance(void) {
@@ -108,6 +119,10 @@ AST* parse_stmt() {
     return new_ast(AST_ASSIGN, expr, NULL, 0, name.name);
   }
 
+  if (tok.type == TOK_LBRACE) {
+    return parse_block();
+  }
+
   fprintf(stderr, "Unexpected stmt in parse_stmt: %s\n", tok.type);
   exit(1);
 }
@@ -124,4 +139,22 @@ AST* parse_program() {
     }
   }
   return root;
+}
+
+AST* parse_block() {
+  advance();
+
+  AST* block = NULL;
+
+  while (tok.type != TOK_RBRACE && tok.type != TOK_EOF) {
+    AST* stmt = parse_stmt();
+    if (!block)
+      block = stmt;
+    else
+      block = new_ast(AST_SEQ, block, stmt, 0, NULL);
+  }
+
+  expect(TOK_RBRACE);
+
+  return block;
 }

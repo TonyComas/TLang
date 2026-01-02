@@ -100,6 +100,12 @@ Token next_token(void) {
   case ';':
     tok.type = TOK_SEMI;
     break;
+  case '{':
+    tok.type = TOK_LBRACE;
+    break;
+  case '}':
+    tok.type = TOK_RBRACE;
+    break;
   default:
     fprintf(stderr, "Unexpected character: '%c'\n", src[-1]);
     exit(1);
