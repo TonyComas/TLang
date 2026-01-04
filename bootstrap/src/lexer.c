@@ -5,6 +5,12 @@
 #include <string.h>
 #include <ctype.h>
 
+void lexer_init(const char* input);
+static void skip_ws(void);
+static int match_keyword(const char* start, int len, const char* kw);
+char* strndup(const char* s, size_t n);
+Token next_token(void);
+
 static const char* src;
 
 void lexer_init(const char* input) {
@@ -70,6 +76,11 @@ Token next_token(void) {
       return tok;
     }
 
+    if (match_keyword(start, len, "if")) {
+      tok.type = TOK_IF;
+      return tok;
+    }
+
     tok.type = TOK_IDENT;
     tok.name = strndup(start, len);
     return tok;
@@ -89,7 +100,12 @@ Token next_token(void) {
     tok.type = TOK_SLASH;
     break;
   case '=':
-    tok.type = TOK_ASSIGN;
+    if (*src == '=') {
+      src++;
+      tok.type = TOK_EQ;
+    } else {
+      tok.type = TOK_ASSIGN;
+    }
     break;
   case '(':
     tok.type = TOK_LPAREN;
@@ -105,6 +121,31 @@ Token next_token(void) {
     break;
   case '}':
     tok.type = TOK_RBRACE;
+    break;
+  case '!':
+    if (*src == '=') {
+      src++;
+      tok.type = TOK_NE;
+    } else {
+      fprintf(stderr, "Unexpected '!'\n");
+      exit(1);
+    }
+    break;
+  case '>':
+    if (*src == '=') {
+      src++;
+      tok.type = TOK_GTE;
+    } else {
+      tok.type = TOK_GT;
+    }
+    break;
+  case '<':
+    if (*src == '=') {
+      src++;
+      tok.type = TOK_LTE;
+    } else {
+      tok.type = TOK_LT;
+    }
     break;
   default:
     fprintf(stderr, "Unexpected character: '%c'\n", src[-1]);

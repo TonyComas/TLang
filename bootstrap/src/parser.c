@@ -14,6 +14,8 @@ AST* parse_expr(void);
 AST* parse_stmt(void);
 AST* parse_program(void);
 AST* parse_block(void);
+AST* parse_eq(void);
+AST* parse_cmp(void);
 
 static Token tok;
 
@@ -87,7 +89,7 @@ AST* parse_add() {
 }
 
 AST* parse_expr() {
-  return parse_add();
+  return parse_eq();
 }
 
 AST* parse_stmt() {
@@ -121,6 +123,16 @@ AST* parse_stmt() {
 
   if (tok.type == TOK_LBRACE) {
     return parse_block();
+  }
+
+  if (tok.type == TOK_IF) {
+    advance();
+    expect(TOK_LPAREN);
+    AST* cond = parse_expr();
+    expect(TOK_RPAREN);
+
+    AST* then = parse_stmt();
+    return new_ast(AST_IF, cond, then, 0, NULL);
   }
 
   fprintf(stderr, "Unexpected stmt in parse_stmt: %s\n", tok.type);
@@ -157,4 +169,52 @@ AST* parse_block() {
   expect(TOK_RBRACE);
 
   return block;
+}
+
+AST* parse_cmp() {
+  AST* node = parse_add();
+
+  while (tok.type == TOK_LT || tok.type == TOK_LTE || tok.type == TOK_GT ||
+         tok.type == TOK_GTE) {
+
+    TokenType op = tok.type;
+    advance();
+    AST* rhs = parse_add();
+
+    ASTType type;
+    switch (op) {
+    case TOK_LT:
+      type = AST_LT;
+      break;
+    case TOK_LTE:
+      type = AST_LTE;
+      break;
+    case TOK_GT:
+      type = AST_GT;
+      break;
+    case TOK_GTE:
+      type = AST_GTE;
+      break;
+    default:
+      error("Invalid comparison op");
+    }
+
+    node = new_ast(type, node, rhs, 0, NULL);
+  }
+
+  return node;
+}
+
+AST* parse_eq() {
+  AST* node = parse_cmp();
+
+  while (tok.type == TOK_EQ || tok.type == TOK_NE) {
+    TokenType op = tok.type;
+    advance();
+    AST* rhs = parse_cmp();
+
+    node = new_ast(op == TOK_EQ ? AST_EQ : AST_NE, node, rhs, 0, NULL);
+  }
+
+  return node;
 }

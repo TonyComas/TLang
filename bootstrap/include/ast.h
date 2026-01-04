@@ -12,7 +12,15 @@ typedef enum {
   AST_LET,
   AST_ASSIGN,
   AST_SEQ,
-  AST_BLOCK
+  AST_BLOCK,
+  AST_IF,
+  AST_EQ,
+  AST_NE,
+  AST_LT,
+  AST_LTE,
+  AST_GT,
+  AST_GTE
+
 } ASTType;
 
 typedef struct AST {

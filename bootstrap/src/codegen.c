@@ -3,6 +3,12 @@
 #include "symtab.h"
 #include <stdlib.h>
 
+static int label_id = 0;
+
+static int new_label(void) {
+  return label_id++;
+}
+
 void codegen_program(AST* root) {
   int localsize = sym_count() * 8;
 
@@ -60,7 +66,19 @@ void codegen_stmt(AST* node) {
     printf("    leave\n");
     printf("    ret\n");
     break;
+  case AST_IF: {
+    int lbl_end = new_label();
 
+    codegen_expr(node->lhs);
+
+    printf("    cmp $0, %%rax\n");
+    printf("    je .Lend%d\n", lbl_end);
+
+    codegen_stmt(node->rhs);
+
+    printf(".Lend%d:\n", lbl_end);
+    break;
+  }
   default:
     codegen_expr(node);
     break;
@@ -90,6 +108,12 @@ void codegen_expr(AST* node) {
   case AST_SUB:
   case AST_MUL:
   case AST_DIV:
+  case AST_EQ:
+  case AST_NE:
+  case AST_LT:
+  case AST_LTE:
+  case AST_GT:
+  case AST_GTE:
     break;
 
   default:
@@ -106,21 +130,49 @@ void codegen_expr(AST* node) {
   case AST_ADD:
     printf("    add %%rcx, %%rax\n");
     break;
-
   case AST_SUB:
     printf("    sub %%rax, %%rcx\n");
     printf("    mov %%rcx, %%rax\n");
     break;
-
   case AST_MUL:
     printf("    imul %%rcx, %%rax\n");
     break;
-
   case AST_DIV:
     printf("    mov %%rax, %%rdi\n");
     printf("    mov %%rcx, %%rax\n");
     printf("    cqo\n");
     printf("    idiv %%rdi\n");
+    break;
+
+  case AST_LT:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    setl %%al\n");
+    printf("    movzb %%al, %%rax\n");
+    break;
+  case AST_LTE:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    setle %%al\n");
+    printf("    movzb %%al, %%rax\n");
+    break;
+  case AST_GT:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    setg %%al\n");
+    printf("    movzb %%al, %%rax\n");
+    break;
+  case AST_GTE:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    setge %%al\n");
+    printf("    movzb %%al, %%rax\n");
+    break;
+  case AST_EQ:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    sete %%al\n");
+    printf("    movzb %%al, %%rax\n");
+    break;
+  case AST_NE:
+    printf("    cmp %%rax, %%rcx\n");
+    printf("    setne %%al\n");
+    printf("    movzb %%al, %%rax\n");
     break;
   }
 }
