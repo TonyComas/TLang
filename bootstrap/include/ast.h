@@ -19,7 +19,10 @@ typedef enum {
   AST_LT,
   AST_LTE,
   AST_GT,
-  AST_GTE
+  AST_GTE,
+  AST_AND,
+  AST_OR,
+  AST_NOT
 
 } ASTType;
 

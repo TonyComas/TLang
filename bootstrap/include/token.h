@@ -25,7 +25,10 @@ typedef enum {
   TOK_LTE,
   TOK_GT,
   TOK_GTE,
-  TOK_IF
+  TOK_IF,
+  TOK_AND,
+  TOK_OR,
+  TOK_NOT
 } TokenType;
 
 typedef struct {

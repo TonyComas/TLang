@@ -8,19 +8,31 @@ main:
     mov $7, %rax
     mov %rax, -16(%rbp)
     mov -8(%rbp), %rax
+    cmp $0, %rax
+    mov $0, %rax
+    sete %al
     push %rax
-    mov $5, %rax
+    mov -16(%rbp), %rax
     pop %rcx
     cmp %rax, %rcx
     setl %al
     movzb %al, %rax
     cmp $0, %rax
-    je .Lend0
-    mov -16(%rbp), %rax
-    leave
-    ret
-.Lend0:
-    mov $2, %rax
+    jne .L0
+    mov -8(%rbp), %rax
+    push %rax
+    mov $10, %rax
+    pop %rcx
+    cmp %rax, %rcx
+    setne %al
+    movzb %al, %rax
+    cmp $0, %rax
+    jne .L0
+    mov $0, %rax
+    jmp .L1
+.L0:
+    mov $1, %rax
+.L1:
     leave
     ret
     mov $0, %rax

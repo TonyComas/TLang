@@ -3,6 +3,10 @@
 #include "symtab.h"
 #include <stdlib.h>
 
+void codegen_program(AST* root);
+void codegen_stmt(AST* node);
+void codegen_expr(AST* node);
+
 static int label_id = 0;
 
 static int new_label(void) {
@@ -90,6 +94,60 @@ void codegen_expr(AST* node) {
     return;
 
   switch (node->type) {
+  case AST_AND: {
+    int false_lbl = new_label();
+    int end_lbl = new_label();
+
+    codegen_expr(node->lhs);
+
+    printf("    cmp $0, %%rax\n");
+    printf("    je .L%d\n", false_lbl);
+
+    codegen_expr(node->rhs);
+
+    printf("    cmp $0, %%rax\n");
+    printf("    je .L%d\n", false_lbl);
+
+    printf("    mov $1, %%rax\n");
+    printf("    jmp .L%d\n", end_lbl);
+
+    printf(".L%d:\n", false_lbl);
+    printf("    mov $0, %%rax\n");
+
+    printf(".L%d:\n", end_lbl);
+    return;
+  }
+  case AST_OR: {
+    int true_lbl = new_label();
+    int end_lbl = new_label();
+
+    codegen_expr(node->lhs);
+
+    printf("    cmp $0, %%rax\n");
+    printf("    jne .L%d\n", true_lbl);
+
+    codegen_expr(node->rhs);
+
+    printf("    cmp $0, %%rax\n");
+    printf("    jne .L%d\n", true_lbl);
+
+    printf("    mov $0, %%rax\n");
+    printf("    jmp .L%d\n", end_lbl);
+
+    printf(".L%d:\n", true_lbl);
+    printf("    mov $1, %%rax\n");
+
+    printf(".L%d:\n", end_lbl);
+    return;
+  }
+  case AST_NOT: {
+    codegen_expr(node->lhs);
+    printf("    cmp $0, %%rax\n");
+    printf("    mov $0, %%rax\n");
+    printf("    sete %%al\n");
+    return;
+  }
+
   case AST_INT:
     printf("    mov $%ld, %%rax\n", node->value);
     return;

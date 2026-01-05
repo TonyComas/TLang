@@ -16,6 +16,9 @@ AST* parse_program(void);
 AST* parse_block(void);
 AST* parse_eq(void);
 AST* parse_cmp(void);
+AST* parse_and(void);
+AST* parse_or(void);
+AST* parse_not(void);
 
 static Token tok;
 
@@ -65,12 +68,12 @@ AST* parse_primary() {
 }
 
 AST* parse_mul() {
-  AST* node = parse_primary();
+  AST* node = parse_not();
 
   while (tok.type == TOK_STAR || tok.type == TOK_SLASH) {
     TokenType op = tok.type;
     advance();
-    AST* rhs = parse_primary();
+    AST* rhs = parse_not();
     node = new_ast(op == TOK_STAR ? AST_MUL : AST_DIV, node, rhs, 0, NULL);
   }
   return node;
@@ -89,7 +92,7 @@ AST* parse_add() {
 }
 
 AST* parse_expr() {
-  return parse_eq();
+  return parse_or();
 }
 
 AST* parse_stmt() {
@@ -217,4 +220,35 @@ AST* parse_eq() {
   }
 
   return node;
+}
+
+AST* parse_or(void) {
+  AST* node = parse_and();
+
+  while (tok.type == TOK_OR) {
+    advance();
+    node = new_ast(AST_OR, node, parse_and(), 0, NULL);
+  }
+
+  return node;
+}
+
+AST* parse_and(void) {
+  AST* node = parse_eq();
+
+  while (tok.type == TOK_AND) {
+    advance();
+    node = new_ast(AST_AND, node, parse_eq(), 0, NULL);
+  }
+
+  return node;
+}
+
+AST* parse_not(void) {
+  if (tok.type == TOK_NOT) {
+    advance();
+    return new_ast(AST_NOT, parse_not(), NULL, 0, NULL);
+  }
+
+  return parse_primary();
 }

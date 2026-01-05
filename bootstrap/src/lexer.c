@@ -127,8 +127,7 @@ Token next_token(void) {
       src++;
       tok.type = TOK_NE;
     } else {
-      fprintf(stderr, "Unexpected '!'\n");
-      exit(1);
+      tok.type = TOK_NOT;
     }
     break;
   case '>':
@@ -145,6 +144,18 @@ Token next_token(void) {
       tok.type = TOK_LTE;
     } else {
       tok.type = TOK_LT;
+    }
+    break;
+  case '&':
+    if (*src == '&') {
+      src++;
+      tok.type = TOK_AND;
+    }
+    break;
+  case '|':
+    if (*src == '|') {
+      src++;
+      tok.type = TOK_OR;
     }
     break;
   default:
